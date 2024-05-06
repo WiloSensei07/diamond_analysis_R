@@ -1,0 +1,122 @@
+---
+title: "Projet_R"
+author: "Wilfried_S"
+date: "2024-04-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R Markdown for PROJET
+
+## Downloading File
+
+```{r}
+library(openxlsx)
+dataset <- read.xlsx("C:\\Users\\Sinka\\OneDrive - Legrand France\\Support DATA IA\\R\\TP_projet\\diamonds_dataset.xlsx")
+donnees <- dataset
+View(donnees)
+attach(donnees)
+```
+
+## Some informations about our DataFrame
+
+```{r}
+summary(donnees) #résumé des variables
+dim(donnees)
+print("Les données sont qualitatives et quantitatives.")
+str(donnees)
+```
+
+## Traitement des valeurs manquantes
+
+```{r}
+valeur_manquant <- sum(colSums(is.na(donnees)))
+if (valeur_manquant>1){
+  cat("Les valeurs manquantes sont au nombre de ", valeur_manquant, "\n")
+} else {
+  cat("Aucune valeur manquante, car il y'a ", valeur_manquant, " valeur manquante!", "\n")
+}
+```
+## Redefinition of datatype
+
+```{r}
+for (i in 1:ncol(donnees)) {
+  if (i == 3 || i == 4 || i == 5){
+    donnees[, i] <- donnees[, i]
+  }
+  else {
+    donnees[, i] <- as.numeric(donnees[, i])
+  }
+}
+
+str(donnees)
+```
+
+## Study of two quantitatives variables.
+
+```{r}
+unique(carat) #Voir les valeurs possibles d'une var
+print("Pour la variable carat")
+summary(carat)
+barplot(table(carat), col=rainbow(2), main="Repartition entre les differents type de carat.")
+```
+
+```{r}
+print("Pour la variable price")
+summary(price)
+barplot(table(price), col=rainbow(2), main="Repartition entre les differents type de prix.")
+```
+
+### Corrélation entre les deux variables
+
+```{r}
+#cor(carat, price) <--! Pourquoi cedi ne fonctionne pas pourtant j'ai converti les valeurs en num??? >
+cor(as.numeric(carat), price) #positif => les variables varient/évoluent dans le même sens.
+```
+### Nuage de point
+
+```{r}
+#14. Afficher le nuage de points. Interpréter
+plot(carat ~ price)
+```
+
+## Independance test between qualitative variable and quantitative variable.
+
+```{r}
+anov <- aov(price ~ cut, data =donnees)
+summary(anov)
+
+print("La p-value pour la variable 'cut' est inférieure à 0.001 (indiquée par ***), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'cut' ont la même moyenne.")
+print("En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'cut'.")
+print("Le F-value élevé (175.7) confirme également que la variable 'cut' a un effet significatif et fort sur la variable dépendante.")
+```
+
+## Independance test between two qualitatives variables.
+
+```{r}
+table(cut, clarity)
+chisq.test(table(cut, clarity))
+
+print("La p-value très basse vous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la taille ('cut') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.")
+```
+
+## Correlation of num datatype
+
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -id)
+library(corrplot)
+cor_donnees_num <- cor(donnees_num)
+#cor_donnees_num
+corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
+         addCoef.col = "orange", # Ajoute les coefficients de corrélation
+         tl.col = "black", # Couleur du texte des labels
+         tl.srt = 45, # Rotation des labels
+         diag = FALSE) # Ne pas inclure les diagonales
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
