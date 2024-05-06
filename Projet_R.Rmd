@@ -120,7 +120,7 @@ library(corrplot)
 cor_donnees_num <- cor(donnees_num)
 #cor_donnees_num
 corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
-         addCoef.col = "blue", # Ajoute les coefficients de corrélation
+         addCoef.col = "pink", # Ajoute les coefficients de corrélation
          tl.col = "black", # Couleur du texte des labels
          tl.srt = 45, # Rotation des labels
          diag = FALSE) # Ne pas inclure les diagonales
