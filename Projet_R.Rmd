@@ -1,6 +1,6 @@
 ---
-title: "Projet_R"
-author: "Wilfried_S"
+title: "Projet d'Analyse de Données avec R"
+author: "Wilfried SINKAM & Joan Cindy MIKONGO OUAMBO"
 date: "2024-04-29"
 output: html_document
 ---
@@ -8,14 +8,22 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## PROBLEMATIQUE
 
-# R Markdown for PROJET
+La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la table (table), ainsi que les dimensions physiques (x, y, z).
+
+L'objectif est de développer un modèle capable de capturer les relations entre ces variables et le prix des diamants, afin de pouvoir estimer le prix d'un diamant donné en se basant sur ses caractéristiques. Cette prédiction peut être utilisée par les professionnels de l'industrie diamantaire, tels que les bijoutiers, les négociants en diamants ou les enchérisseurs, pour évaluer la valeur des diamants et prendre des décisions éclairées lors de l'achat ou de la vente de ces pierres précieuses.
+
+Il convient de noter que la qualité de la coupe, la couleur, la clarté et d'autres facteurs intrinsèques des diamants ont traditionnellement un impact significatif sur leur prix. En combinant ces informations avec les dimensions physiques et d'autres variables du dataset, le modèle pourra fournir des estimations de prix plus précises pour les diamants.
+
+Il est important de souligner que la qualité et l'exactitude des prédictions dépendront de la qualité des données d'entraînement, de la sélection appropriée des caractéristiques pertinentes et du choix du modèle de régression approprié. Une fois le modèle développé, il pourra être utilisé pour prédire le prix de nouveaux diamants en fournissant les caractéristiques correspondantes en entrée.
+
 
 ## Downloading File
 
 ```{r}
 library(openxlsx)
-dataset <- read.xlsx("C:\\Users\\Sinka\\OneDrive - Legrand France\\Support DATA IA\\R\\TP_projet\\diamonds_dataset.xlsx")
+dataset <- read.xlsx("diamonds_dataset.xlsx")
 donnees <- dataset
 View(donnees)
 attach(donnees)
@@ -112,7 +120,7 @@ library(corrplot)
 cor_donnees_num <- cor(donnees_num)
 #cor_donnees_num
 corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
-         addCoef.col = "orange", # Ajoute les coefficients de corrélation
+         addCoef.col = "blue", # Ajoute les coefficients de corrélation
          tl.col = "black", # Couleur du texte des labels
          tl.srt = 45, # Rotation des labels
          diag = FALSE) # Ne pas inclure les diagonales
