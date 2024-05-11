@@ -6,7 +6,7 @@ output: html_document
 ---
 
 
-## PROBLEMATIQUE
+## Introduction ET PROBLEMATIQUE
 
 La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la table (table), ainsi que les dimensions physiques (x, y, z).
 
@@ -48,21 +48,22 @@ Clarity: mesure de la clarté du diamant.
 
 ## II- Distribution des données
 
-### 1- La variable dépendante: Carat
+### 1- La variable dépendante: Price
 
 ```{r}
-summary(carat)
+summary(price)
 ```
 
 ```{r}
 library(ggplot2)
 par(mfrow = c(1, 2))
-hist(carat, breaks="FD", freq=FALSE, xlab="poids en carat", main="Distribution suivant les poids en Carats", cex.main = 0.75)
-lines(density(carat), col = "orange", lwd = 2)
-boxplot(carat, ylab="Poids en carat", main="Boxplot de carat", cex.main = 0.75)
+hist(price, breaks="FD", freq=FALSE, xlab="Prix", main="Distribution des prix", cex.main = 0.75)
+lines(density(price), col = "orange", lwd = 2)
+boxplot(price, ylab="Prix", main="Boxplot des prix", cex.main = 0.75)
 ```
 
-Les diamants de notre échantillon ont un poids compris entre 0.20 et 5.01 carat. La moitié de ces diamants ont un poids inférieur ou égal à 0.7 carat et le diamant moyen pèse 0.79 carat. L'examen de la distribtion assortie de sa courbe de densité montre que les poids en carat ne suivent pas une loi normale. La présence de valeurs extrêmes est identifiable par des points individuels au-delà de la moustache supérieure. Il s'agit des diamants dont le poids en carats est significativement plus élevé par rapport à ceux des autres diamants.
+Les prix des diamants de notre dataset sont compris entre 326 et 18823 dollars. La moitié des diamants ont un prix inférieur ou égal à 2401 dollars et le diamant moyen vaut 3933 dollars. L'examen de la distribtion assortie de sa courbe de densité montre que les prix des diamants ne suivent pas une loi normale. La présence de valeurs extrêmes est identifiable par des points individuels au-delà de la moustache supérieure. Ainsi, les diamants d'une valeur supérieure à 12000 dollars sont considérés comme étant des valeurs extrêmes.
+
 
 
 ### 2- Les variables indépendantes
@@ -97,19 +98,20 @@ boxplot(table, ylab="Largeur des sommets de diamants", main="Boxplot Largeur des
 Les largeurs des sommets des diamants sont compris entre 43 et 95. La moitié des diamants ont des sommets avec des largeurs inférieur ou égal à 57.00 et la largeur du sommet du diamant moyen est de 57.46 . La courbe de densité reflète que la distribution est dissymétrique et  à travers le boxplot on constate la présence de valeurs extrêmes.
 
 
-#### 2.3. Price
+#### 2.3. Carat
 
 ```{r}
-summary(price)
+summary(carat)
 ```
+
 ```{r}
 par(mfrow = c(1, 2))
-hist(price, breaks="FD", freq=FALSE, xlab="Prix", main="Distribution des prix", cex.main = 0.75)
-lines(density(price), col = "orange", lwd = 2)
-boxplot(price, ylab="Prix", main="Boxplot des prix", cex.main = 0.75)
+hist(carat, breaks="FD", freq=FALSE, xlab="poids en carat", main="Distribution suivant les poids en Carats", cex.main = 0.75)
+lines(density(carat), col = "orange", lwd = 2)
+boxplot(carat, ylab="Poids en carat", main="Boxplot de carat", cex.main = 0.75)
 ```
 
-Les prix des diamants sont compris entre 326 et 18823 dollars. La moitié des diamants ont un prix inférieur ou égal à 2401 dollars et le diamant moyen vaut 3933 dollars. Cette distribution des prix de diamants ne suit pas une loi normale. Les diamants d'une valeur supérieure à 12000 dollars sont considérés comme étant des valeurs extrêmes.
+Les diamants de notre échantillon ont un poids compris entre 0.20 et 5.01 carat. La moitié de ces diamants ont un poids inférieur ou égal à 0.7 carat et le diamant moyen pèse 0.79 carat. L'examen de la distribtion assortie de sa courbe de densité montre que les poids en carat ne suivent pas une loi normale. La présence de valeurs extrêmes est identifiable par des points individuels au-delà de la moustache supérieure. Il s'agit des diamants dont le poids en carats est significativement plus élevé par rapport à ceux des autres diamants.
 
 
 #### 2.4. X (Longeur en mm)
@@ -209,20 +211,8 @@ if (valeur_manquant>1){
 ```
 
 
-## Study of two quantitatives variables.
+## IV- CORRELATIONS ET TESTS D'INDEPENDANCE
 
-```{r}
-unique(carat) #Voir les valeurs possibles d'une var
-print("Pour la variable carat")
-summary(carat)
-barplot(table(carat), col=rainbow(2), main="Repartition entre les differents type de carat.")
-```
-
-```{r}
-print("Pour la variable price")
-summary(price)
-barplot(table(price), col=rainbow(2), main="Repartition entre les differents type de prix.")
-```
 
 ### Corrélation entre les deux variables
 
