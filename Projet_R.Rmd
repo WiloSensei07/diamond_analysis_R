@@ -5,9 +5,7 @@ date: "2024-04-29"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 ## PROBLEMATIQUE
 
 La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la table (table), ainsi que les dimensions physiques (x, y, z).
@@ -19,26 +17,187 @@ Il convient de noter que la qualité de la coupe, la couleur, la clarté et d'au
 Il est important de souligner que la qualité et l'exactitude des prédictions dépendront de la qualité des données d'entraînement, de la sélection appropriée des caractéristiques pertinentes et du choix du modèle de régression approprié. Une fois le modèle développé, il pourra être utilisé pour prédire le prix de nouveaux diamants en fournissant les caractéristiques correspondantes en entrée.
 
 
-## Downloading File
+## I- Importation et Description du Dataset
 
 ```{r}
-library(openxlsx)
-dataset <- read.xlsx("diamonds_dataset.xlsx")
-donnees <- dataset
+library(readr)
+donnees <- read_csv("diamonds.csv")
 View(donnees)
 attach(donnees)
 ```
 
-## Some informations about our DataFrame
-
 ```{r}
-summary(donnees) #résumé des variables
 dim(donnees)
-print("Les données sont qualitatives et quantitatives.")
 str(donnees)
 ```
 
-## Traitement des valeurs manquantes
+
+Notre Dataset est constitué de 53940 observations. En dehors de la variable d'identification, le dataset est composé de 10 variables ; 07 d'entre elles à savoir carat, depht, table, price, x, y et z sont de nature quantitatives et de type réel; le cut, le color et la clarity sont de nature qualitatives.
+
+Carat: Poids du diamant en carat ; 
+Depth: Profondeur totale pourcentage ; 
+Table: Largeur du sommet du diamant ; 
+Price: Prix du diamant ; 
+X: Longueur du diamant en mm ; 
+Y: Largeur du diamant en mm ; 
+Z: Profondeur du diamant en mm ; 
+Cut: Qualité de la coupure du diamant ; 
+Color: Couleur du diamant ; 
+Clarity: mesure de la clarté du diamant.
+
+
+## II- Distribution des données
+
+### 1- La variable dépendante: Carat
+
+```{r}
+summary(carat)
+```
+
+```{r}
+library(ggplot2)
+par(mfrow = c(1, 2))
+hist(carat, breaks="FD", freq=FALSE, xlab="poids en carat", main="Distribution suivant les poids en Carats", cex.main = 0.75)
+lines(density(carat), col = "orange", lwd = 2)
+boxplot(carat, ylab="Poids en carat", main="Boxplot de carat", cex.main = 0.75)
+```
+
+Les diamants de notre échantillon ont un poids compris entre 0.20 et 5.01 carat. La moitié de ces diamants ont un poids inférieur ou égal à 0.7 carat et le diamant moyen pèse 0.79 carat. L'examen de la distribtion assortie de sa courbe de densité montre que les poids en carat ne suivent pas une loi normale. La présence de valeurs extrêmes est identifiable par des points individuels au-delà de la moustache supérieure. Il s'agit des diamants dont le poids en carats est significativement plus élevé par rapport à ceux des autres diamants.
+
+
+### 2- Les variables indépendantes
+
+#### 2.1. Depth
+
+```{r}
+summary(depth)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(depth, breaks="FD", freq=FALSE, xlab="Pourcentage des profondeurs", main="Distribution suivant le pourcentage des profondeurs", cex.main = 0.75)
+lines(density(depth), col = "orange", lwd = 2)
+boxplot(depth, ylab=" Pourcentage des Profondeurs", main="Boxplot du pourcentage des profondeurs",cex.main = 0.75)
+```
+
+Les pourcentages de profondeur des diamants sont compris entre 43 et 79. La moitié des diamants ont un pourcentage de profondeur inférieur ou égal à 61.80 et le diamant moyen a un pourcentage de profondeur qui vaut 61.75. Leur courbe de densité reflète la distribution d'une loi normale. On constate la présence de valeurs extrêmes.
+
+
+#### 2.2. Table
+
+```{r}
+summary(table)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(table, breaks="FD", freq=FALSE, xlab="Largeur des sommets de diamants", main="Distribution des largeur des sommets de diamants", cex.main = 0.75)
+lines(density(table), col = "orange", lwd = 2)
+boxplot(table, ylab="Largeur des sommets de diamants", main="Boxplot Largeur des sommets de diamants", cex.main = 0.75)
+```
+
+Les largeurs des sommets des diamants sont compris entre 43 et 95. La moitié des diamants ont des sommets avec des largeurs inférieur ou égal à 57.00 et la largeur du sommet du diamant moyen est de 57.46 . La courbe de densité reflète que la distribution est dissymétrique et  à travers le boxplot on constate la présence de valeurs extrêmes.
+
+
+#### 2.3. Price
+
+```{r}
+summary(price)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(price, breaks="FD", freq=FALSE, xlab="Prix", main="Distribution des prix", cex.main = 0.75)
+lines(density(price), col = "orange", lwd = 2)
+boxplot(price, ylab="Prix", main="Boxplot des prix", cex.main = 0.75)
+```
+
+Les prix des diamants sont compris entre 326 et 18823 dollars. La moitié des diamants ont un prix inférieur ou égal à 2401 dollars et le diamant moyen vaut 3933 dollars. Cette distribution des prix de diamants ne suit pas une loi normale. Les diamants d'une valeur supérieure à 12000 dollars sont considérés comme étant des valeurs extrêmes.
+
+
+#### 2.4. X (Longeur en mm)
+
+```{r}
+summary(x)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(x, breaks="FD", freq=FALSE, xlab="Longueur en mm", main="Distribution des longueurs en mm", cex.main = 0.75)
+lines(density(x), col = "orange", lwd = 2)
+boxplot(x, ylab="Longueurs en mm", main="Boxplot des longueurs en mm", cex.main = 0.75)
+```
+
+
+Les longueurs des diamants sont comprises entre 0 et 10.74 mm. La moitié des diamants ont une longueur inférieure ou égale à 5.7 mm  et la longueur du diamant moyen est de 5.73 mm. Leur courbe de densité reflète la distribution pas symétrique. On constate la présence de valeurs extrêmes.
+
+
+#### 2.5. Y (Largeur en mm)
+
+```{r}
+summary(y)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(y, breaks="FD", freq=FALSE, xlab="Largeur en mm", main="Distribution des largeurs en mm", cex.main = 0.75)
+lines(density(y), col = "orange", lwd = 2)
+boxplot(y, ylab="Largeur en mm", main="Boxplot des y", cex.main = 0.75)
+```
+
+Les largeurs des diamants sont comprises entre 0 et 58.9 mm. La moitié des diamants ont une largeur inférieure ou égal à 5.71 mm et le diamant moyen a une largeur de 5.73 mm. Cette distribution est dissymétrique et comporte des valeurs extrêmes.
+
+
+#### 2.6. Z (Profondeur en mm)
+
+```{r}
+summary(z)
+```
+```{r}
+par(mfrow = c(1, 2))
+hist(z, breaks="FD", freq=FALSE, xlab="Profondeur en mm", main="Distribution des profondeurs en mm", cex.main = 0.75)
+lines(density(z), col = "orange", lwd = 2)
+boxplot(z, ylab="Profondeur en mm", main="Boxplot des profondeurs en mm", cex.main = 0.75)
+```
+
+Les profondeurs des diamants sont comprises entre 0 et 31.8 mm. 50% des diamants ont une profondeur inférieure ou égal à 3.53 mm et le diamant moyen a une profondeur de 3.54 mm. Cette distribution est dissymétrique et comporte des valeurs extrêmes.
+
+
+#### 2.7. Color
+
+```{r}
+color_count <- table(color)
+color_percentage <- round(prop.table(color_count) * 100, 2)
+pie(color_percentage, labels = paste0(names(color_percentage), " (", color_percentage, ")"),col = rainbow(length(color_percentage)), main="Distribution selon les couleurs (%)")
+```
+
+Les couleurs vont de D à J, qui représentent la couleur la plus meilleure à la plus pire. Ainsie, la plus grande partie des diamants (20.93%) ont une couleur jugée de qualité moyenne (couleur G). Seuls 5.21% des diamants ont une couleur considérée comme mauvaise (couleur J).
+
+
+#### 2.8. Cut
+
+```{r}
+cut_count <- table(cut)
+cut_percentage <- round(prop.table(cut_count) * 100, 2)
+pie(cut_percentage, labels = paste0(names(cut_percentage), " (", cut_percentage, ")"),col = rainbow(length(cut_percentage)), main="Distribution selon la qualité de la coupure (%)")
+```
+
+39.95% des diamants ont des coupures considérées comme idéales, 25.57% sont de qualité premium, et seul 2.98% sont considérées comme ayant des coupures passables.
+
+
+#### 2.9. Clarity
+
+```{r}
+clarity_count <- table(clarity)
+clarity_percentage <- round(prop.table(clarity_count) * 100, 2)
+pie(clarity_percentage, labels = paste0(names(clarity_percentage), " (", clarity_percentage, ")"),col = rainbow(length(clarity_percentage)), main="Distribution selon la clarté (%)")
+```
+
+Les mesures de clarté varie entre I1 et IF. I1 représente la pire des clartés où des défauts internes sont visibles à l'oeil nu tandis que IF représente la meilleure des clartés où aucune inclusion ou défaut interne n'est visible sous une loupe grossissante de 10x, c'est la plus haute qualité de clarté. 
+
+VVS1/VVS2 : De très petites inclusions difficiles à voir sous une loupe grossissante de 10x.
+
+VS1/VS2 : De petites inclusions visibles sous une loupe grossissante de 10x, mais difficilement visibles à l'œil nu.
+
+SI1/SI2 : Des inclusions visibles sous une loupe grossissante de 10x, et parfois visibles à l'œil nu.
+
+
+## III- Traitement des valeurs manquantes & valeurs abbérantes
 
 ```{r}
 valeur_manquant <- sum(colSums(is.na(donnees)))
@@ -48,20 +207,7 @@ if (valeur_manquant>1){
   cat("Aucune valeur manquante, car il y'a ", valeur_manquant, " valeur manquante!", "\n")
 }
 ```
-## Redefinition of datatype
 
-```{r}
-for (i in 1:ncol(donnees)) {
-  if (i == 3 || i == 4 || i == 5){
-    donnees[, i] <- donnees[, i]
-  }
-  else {
-    donnees[, i] <- as.numeric(donnees[, i])
-  }
-}
-
-str(donnees)
-```
 
 ## Study of two quantitatives variables.
 
@@ -114,17 +260,16 @@ print("La p-value très basse vous permet de rejeter l'hypothèse nulle d'indép
 ## Correlation of num datatype
 
 ```{r}
-donnees_num <- donnees[sapply(donnees, is.numeric)]
-donnees_num <- subset(donnees_num, select = -id)
-library(corrplot)
-cor_donnees_num <- cor(donnees_num)
+#donnees_num <- donnees[sapply(donnees, is.numeric)]
+#donnees_num <- subset(donnees_num, select = -id)
+#library(corrplot)
+#cor_donnees_num <- cor(donnees_num)
 #cor_donnees_num
-corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
-         addCoef.col = "orange", # Ajoute les coefficients de corrélation
-         tl.col = "black", # Couleur du texte des labels
-         tl.srt = 45, # Rotation des labels
-         diag = FALSE) # Ne pas inclure les diagonales
-
+#corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
+         #addCoef.col = "orange", # Ajoute les coefficients de corrélation
+         #tl.col = "black", # Couleur du texte des labels
+         #tl.srt = 45, # Rotation des labels
+         #diag = FALSE) # Ne pas inclure les diagonales
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
