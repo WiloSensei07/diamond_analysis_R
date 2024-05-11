@@ -21,6 +21,10 @@ Il est important de souligner que la qualité et l'exactitude des prédictions d
 
 ```{r}
 library(readr)
+library(car)
+library(ggplot2)
+library(lm.beta)
+library(corrplot)
 donnees <- read_csv("diamonds.csv")
 View(donnees)
 attach(donnees)
@@ -55,7 +59,6 @@ summary(carat)
 ```
 
 ```{r}
-library(ggplot2)
 par(mfrow = c(1, 2))
 hist(carat, breaks="FD", freq=FALSE, xlab="poids en carat", main="Distribution suivant les poids en Carats", cex.main = 0.75)
 lines(density(carat), col = "orange", lwd = 2)
@@ -197,7 +200,123 @@ VS1/VS2 : De petites inclusions visibles sous une loupe grossissante de 10x, mai
 SI1/SI2 : Des inclusions visibles sous une loupe grossissante de 10x, et parfois visibles à l'œil nu.
 
 
-## III- Traitement des valeurs manquantes & valeurs abbérantes
+## III- Analyse bivariée
+
+### Test d'indépendance entre la variable à expliquer (Price) et les variables qualitatives
+
+#### Entre Price et Cut
+```{r}
+anov <- aov(price ~ cut, data =donnees)
+summary(anov)
+print("La p-value pour la variable 'cut' est inférieure à 0.001 (indiquée par ***), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'cut' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'cut'. Le F-value élevé (175.7) confirme également que la variable 'cut' a un effet significatif et fort sur la variable dépendante.")
+
+```
+#### Entre Price et Color
+```{r}
+anov <- aov(price ~ color, data =donnees)
+summary(anov)
+print("La p-value pour la variable 'color' est inférieure à 0.001 (indiquée par ***), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'color' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'color'. Le F-value élevé (290.2) confirme également que la variable 'color' a un effet significatif et fort sur la variable dépendante.")
+```
+
+#### Entre Price et Clarity
+```{r}
+anov <- aov(price ~ clarity, data =donnees)
+summary(anov)
+print("La p-value pour la variable 'clarity' est inférieure à 0.001 (indiquée par ***), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'clarity' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'clarity'. Le F-value élevé (215) confirme également que la variable 'clarity' a un effet significatif et fort sur la variable dépendante.")
+```
+
+### Test d'indépendance entre les variables qualitatives
+
+#### Entre Cut et Clarity
+```{r}
+table(cut, clarity)
+chisq.test(table(cut, clarity))
+print("La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la coupure ('cut') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.")
+```
+
+#### Entre Cut et Color
+```{r}
+table(cut, color)
+chisq.test(table(cut, color))
+print("La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'color'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la coupure ('cut') et la couleur ('color') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.")
+```
+
+#### Entre Color et Clarity
+```{r}
+table(color, clarity)
+chisq.test(table(color, clarity))
+print("La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'color' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la couleur ('color') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.")
+```
+
+### Test d'indépendance entre la variable à expliquer (Price) et les variables quantitatives
+
+#### La corrélation
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+cor_donnees_num <- cor(donnees_num)
+corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
+         addCoef.col = "orange", # Ajoute les coefficients de corrélation
+         tl.col = "black", # Couleur du texte des labels
+         tl.srt = 45, # Rotation des labels
+         diag = FALSE) # Ne pas inclure les diagonales
+```
+
+#### Le coefficient de détermination
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+coef_donnees_num <- cov(donnees_num)^2
+print(coef_donnees_num)
+```
+
+
+#### La covariance
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+cov_donnees_num <- cov(donnees_num)
+print(cov_donnees_num)
+
+```
+
+## MODÉLE
+```{r}
+model <- lm(price ~ carat + depth + table + x + y + z, data = donnees)
+summary(model)
+vif_model <- vif(model)
+print(vif_model)
+```
+
+### Petite conclusion sur le modèle
+#### Coefficients
+```{r}
+print("Carat : Avec un coefficient de 10686.309 et une valeur p très faible (< 2e-16), il est clair que le carat est un prédicteur extrêmement puissant du prix. Plus le diamant est lourd, plus son prix est élevé.
+Depth et Table : Ces variables montrent des coefficients négatifs, signifiant que plus la profondeur ou la taille de la table est élevée, plus le prix diminue, toutes choses égales par ailleurs. Les p-values très faibles indiquent que ces relations sont statistiquement significatives.
+X (longueur) : Le coefficient négatif suggère que plus la longueur est grande, moins le prix est élevé, ce qui peut paraître contre-intuitif. Cela pourrait indiquer une multicollinéarité avec les autres dimensions, affectant l'interprétation.
+Y (largeur) et Z (profondeur) : Y a un petit effet positif sur le prix, tandis que Z a un effet encore plus petit et non significatif (p-value = 0.34744).")
+```
+
+#### Statistiques globales du modèle
+```{r}
+print("R-squared (R²) : Le R² de 0.8592 indique que le modèle explique environ 85.92% de la variabilité du prix des diamants, ce qui est très élevé. Cela suggère que le modèle est globalement efficace pour prédire le prix.
+Adjusted R-squared : Similaire au R-squared, indiquant que le modèle est robuste même après ajustement pour le nombre de prédicteurs utilisés.
+Residual Standard Error (RSE) : Le RSE de 1497 sur 53933 degrés de liberté montre la déviation standard des résidus. Compte tenu de la plage de prix des diamants, cette erreur peut être considérée comme acceptable, mais cela dépend du contexte commercial.
+F-statistic : Un F-statistique extrêmement élevé et une p-value associée très faible indiquent que le modèle est statistiquement significatif et que les variables choisies ont un effet collectif important sur la prédiction du prix.")
+```
+
+#### Conclusion
+```{r}
+print("Le modèle est statistiquement robuste et efficace pour prédire le prix des diamants en se basant sur les variables incluses. Cependant, l'interprétation de certains coefficients (notamment pour les dimensions x, y, et z) nécessite une attention particulière, car ils peuvent être affectés par la multicollinéarité entre ces variables. Il serait judicieux de vérifier la présence de multicollinéarité, par exemple en calculant le VIF (Variance Inflation Factor) pour ces variables.")
+```
+
+#### Axes d'amélioration
+```{r}
+print("Pour améliorer ce modèle, on pourrait envisager d'exclure ou de transformer certaines variables, d'ajouter des interactions si pertinentes, ou d'explorer des modèles non linéaires ou des méthodes d'ensemble si la complexité des relations le justifie.")
+```
+
+
+## V- Traitement des valeurs manquantes & valeurs abbérantes
 
 ```{r}
 valeur_manquant <- sum(colSums(is.na(donnees)))
@@ -206,70 +325,6 @@ if (valeur_manquant>1){
 } else {
   cat("Aucune valeur manquante, car il y'a ", valeur_manquant, " valeur manquante!", "\n")
 }
-```
-
-
-## Study of two quantitatives variables.
-
-```{r}
-unique(carat) #Voir les valeurs possibles d'une var
-print("Pour la variable carat")
-summary(carat)
-barplot(table(carat), col=rainbow(2), main="Repartition entre les differents type de carat.")
-```
-
-```{r}
-print("Pour la variable price")
-summary(price)
-barplot(table(price), col=rainbow(2), main="Repartition entre les differents type de prix.")
-```
-
-### Corrélation entre les deux variables
-
-```{r}
-#cor(carat, price) <--! Pourquoi cedi ne fonctionne pas pourtant j'ai converti les valeurs en num??? >
-cor(as.numeric(carat), price) #positif => les variables varient/évoluent dans le même sens.
-```
-### Nuage de point
-
-```{r}
-#14. Afficher le nuage de points. Interpréter
-plot(carat ~ price)
-```
-
-## Independance test between qualitative variable and quantitative variable.
-
-```{r}
-anov <- aov(price ~ cut, data =donnees)
-summary(anov)
-
-print("La p-value pour la variable 'cut' est inférieure à 0.001 (indiquée par ***), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'cut' ont la même moyenne.")
-print("En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'cut'.")
-print("Le F-value élevé (175.7) confirme également que la variable 'cut' a un effet significatif et fort sur la variable dépendante.")
-```
-
-## Independance test between two qualitatives variables.
-
-```{r}
-table(cut, clarity)
-chisq.test(table(cut, clarity))
-
-print("La p-value très basse vous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la taille ('cut') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.")
-```
-
-## Correlation of num datatype
-
-```{r}
-#donnees_num <- donnees[sapply(donnees, is.numeric)]
-#donnees_num <- subset(donnees_num, select = -id)
-#library(corrplot)
-#cor_donnees_num <- cor(donnees_num)
-#cor_donnees_num
-#corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
-         #addCoef.col = "orange", # Ajoute les coefficients de corrélation
-         #tl.col = "black", # Couleur du texte des labels
-         #tl.srt = 45, # Rotation des labels
-         #diag = FALSE) # Ne pas inclure les diagonales
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
