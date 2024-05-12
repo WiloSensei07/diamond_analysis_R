@@ -8,13 +8,11 @@ output: html_document
 
 ## INTRODUCTION ET PROBLEMATIQUE
 
-La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la table (table), ainsi que les dimensions physiques (x, y, z).
+La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la largeur du sommet (table), ainsi que les dimensions physiques (x, y, z).
 
 L'objectif est de développer un modèle capable de capturer les relations entre ces variables et le prix des diamants, afin de pouvoir estimer le prix d'un diamant donné en se basant sur ses caractéristiques. Cette prédiction peut être utilisée par les professionnels de l'industrie diamantaire, tels que les bijoutiers, les négociants en diamants ou les enchérisseurs, pour évaluer la valeur des diamants et prendre des décisions éclairées lors de l'achat ou de la vente de ces pierres précieuses.
 
-Il convient de noter que la qualité de la coupe, la couleur, la clarté et d'autres facteurs intrinsèques des diamants ont traditionnellement un impact significatif sur leur prix. En combinant ces informations avec les dimensions physiques et d'autres variables du dataset, le modèle pourra fournir des estimations de prix plus précises pour les diamants.
-
-Il est important de souligner que la qualité et l'exactitude des prédictions dépendront de la qualité des données d'entraînement, de la sélection appropriée des caractéristiques pertinentes et du choix du modèle de régression approprié. Une fois le modèle développé, il pourra être utilisé pour prédire le prix de nouveaux diamants en fournissant les caractéristiques correspondantes en entrée.
+Il est important de souligner que la qualité et l'exactitude des prédictions dépendront de la qualité des données d'entraînement, de la sélection appropriée des caractéristiques pertinentes et du choix du modèle de régression approprié.
 
 
 ## I- Importation et Description du Dataset
@@ -198,7 +196,6 @@ La p-value pour la variable 'clarity' est inférieure à 0.001 (indiquée par **
 
 #### 2.1. Entre Cut et Clarity
 ```{r}
-table(cut, clarity)
 chisq.test(table(cut, clarity))
 ```
 
@@ -207,7 +204,6 @@ La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance
 
 #### 2.2. Entre Cut et Color
 ```{r}
-table(cut, color)
 chisq.test(table(cut, color))
 ```
 
@@ -215,7 +211,6 @@ La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance
 
 #### 2.3. Entre Color et Clarity
 ```{r}
-table(color, clarity)
 chisq.test(table(color, clarity))
 ```
 
@@ -302,9 +297,7 @@ summary(model1)
 
 - Le R² ajusté, qui prend en compte le nombre de variables explicatives, révèle que le modèle explique 84.91% du prix du diamant.
 
-##### F-statistic (Statistique F) :
-
-La statistique F teste l'hypothèse nulle que tous les coefficients de régression sont nuls (c'est-à-dire que le modèle n'a pas de pouvoir prédictif). La p-value associée à la statistique F est très faible (< 2.2e-16), ce qui indique que le modèle dans son ensemble est statistiquement significatif.
+- La p-value associée à la statistique F est très faible (< 2.2e-16), ce qui indique que le modèle dans son ensemble est statistiquement significatif. Le modèle est donc pertinent.
 
 
 
@@ -317,37 +310,19 @@ vif_model <- vif(model2)
 print(vif_model)
 ```
 
+- Toute chose étant égale par ailleurs, le carat, le depth, la table et la caractéristique x ont un effet significatif sur le prix (p-value<2e-16). 
 
-##### Les Coefficients
+- Le modèle explique environ 85.86% de la variabilité du prix des diamants, ce qui est très élevé. Cela suggère que le modèle est globalement efficace pour prédire le prix.
 
-- Carat : Avec un coefficient de 10686.309 et une valeur p très faible (< 2e-16), il est clair que le carat est un prédicteur extrêmement puissant du prix. Plus le diamant est lourd, plus son prix est élevé.
+- La p-value associée très faible indique que le modèle est statistiquement significatif et pertinent.
 
-- Depth et Table : Ces variables montrent des coefficients négatifs, signifiant que plus la profondeur ou la taille de la table est élevée, plus le prix diminue, toutes choses égales par ailleurs. Les p-values très faibles indiquent que ces relations sont statistiquement significatives.
-
-- X (longueur) : Le coefficient négatif suggère que plus la longueur est grande, moins le prix est élevé, ce qui peut paraître contre-intuitif. Cela pourrait indiquer une multicollinéarité avec les autres dimensions, affectant l'interprétation.
-
-- Y (largeur) et Z (profondeur) : Y a un petit effet positif sur le prix, tandis que Z a un effet encore plus petit et non significatif (p-value = 0.34744).
+- Le modèle est statistiquement robuste et efficace pour prédire le prix des diamants en se basant sur les variables incluses. Cependant, l'interprétation de certains coefficients (notamment pour les dimensions x, y, et z) nécessite une attention particulière, car ils sont affectés par la multicollinéarité. 
 
 
-##### Statistiques globales du modèle / Estimation de la performance du modèle
+#### 3. Estimation de la performance du modèle: le BIC
 
-- R-squared (R²) : Le R² de 0.8592 indique que le modèle explique environ 85.92% de la variabilité du prix des diamants, ce qui est très élevé. Cela suggère que le modèle est globalement efficace pour prédire le prix.
+Etant donné que nous avions des variables fortement correlées entre elles dans le modèle précédent, nous allons procéder à une sélection de variables avec le critère Bayesian Information Criterion (BIC). Il est parcimonieux et permet d'obtenir un modèle autant performant que les autres modèles mais avec le moins de variables.
 
-- Adjusted R-squared : Similaire au R-squared, indiquant que le modèle est robuste même après ajustement pour le nombre de prédicteurs utilisés.
-
-- Residual Standard Error (RSE) : Le RSE de 1497 sur 53933 degrés de liberté montre la déviation standard des résidus. Compte tenu de la plage de prix des diamants, cette erreur peut être considérée comme acceptable, mais cela dépend du contexte commercial.
-
-- F-statistic : Un F-statistique extrêmement élevé et une p-value associée très faible indiquent que le modèle est statistiquement significatif et que les variables choisies ont un effet collectif important sur la prédiction du prix.
-
-##### Récapitulatif
-Le modèle est statistiquement robuste et efficace pour prédire le prix des diamants en se basant sur les variables incluses. Cependant, l'interprétation de certains coefficients (notamment pour les dimensions x, y, et z) nécessite une attention particulière, car ils peuvent être affectés par la multicollinéarité. 
-
-
-#### 3. Estimation de la performance du modèle: faire le BIC ou l'AIC
-
-Etant donné que nous avions des variables fortement correlées entre elles dans le modèle précédent, nous allons procéder à une sélection de variables. 
-
-##### 3.1. Sélection avec le Bayesian Information Criterion (BIC).
 
 ```{r}
 library(MASS)
@@ -356,24 +331,12 @@ summary(final_model)
 
 ```
 
-Le critère BIC suggère que les variables les plus pertinentes de ce modèle sont carat, depth, table, x et y. Le modèle est significatif (p-value: < 2.2e-16) et explique 85.92% de la variation du prix des diamants (Adjusted R-squared:  0.8592).
-
-
-##### 3.2. Sélection avec l'Akaike Information Criterion (AIC).
-
-```{r}
-final_model2 <- stepAIC(model2, k = 2, direction = "both") # Appliquer stepAIC avec le critère AIC
-summary(final_model2)
-```
-Le critère AIC suggère que les variables les plus pertinentes de ce modèle sont carat, depth, table et x et y. Le modèle significatif (p-value: < 2.2e-16) et explique 85.92% de la variation du prix des diamants (Adjusted R-squared:  0.8592)
-
-
-
+Le critère BIC suggère que les variables les plus pertinentes de ce modèle sont carat, depth, table, et x. Le modèle constitué de ces 4 variables est significatif (p-value: < 2.2e-16) et explique 85.86% de la variation du prix des diamants, tout comme le modèle saturé.
 
 
 #### 4. Prédiction
 
-Pour la prédiction, nous allons utiliser le modèle final qui a été fourni grâce à la sélection avec le critère BIC car celui ci est plus parcimonieux, il est autant performant que les autres modèles mais avec le moins de variables.
+Pour la prédiction, nous allons utiliser le modèle final qui a été fourni grâce à la sélection effectuée avec le critère BIC.
 
 ```{r}
 pred <- predict(final_model, data = test_data) # Prédictions normalisées
