@@ -312,7 +312,16 @@ Le prix est fortement correlé au carat et aux caractéristiques physiques x, y 
 ###### NB///(Dans nos analyses univariées, nous avons relevé que notre distribution ne suivait pas une loi normale. Ainsi, avant de procéder à la regression, nous allons normaliser les données.)
 
 ```{r}
+<<<<<<< Updated upstream
 
+=======
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+coef_donnees_num <- cor(donnees_num)^2
+price_coef_donnees_num <- coef_donnees_num[, "price"]
+
+print(price_coef_donnees_num)
+>>>>>>> Stashed changes
 ```
 
 
