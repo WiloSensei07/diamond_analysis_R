@@ -766,23 +766,12 @@ variables quantitatives</h3>
 <pre class="r"><code>donnees_num &lt;- donnees[sapply(donnees, is.numeric)]
 donnees_num &lt;- subset(donnees_num, select = -...1)
 cov_donnees_num &lt;- cov(donnees_num)
-print(cov_donnees_num)</code></pre>
-<pre><code>##              carat        depth        table         price            x
-## carat 2.246867e-01   0.01916653    0.1923645  1.742765e+03    0.5184841
-## depth 1.916653e-02   2.05240384   -0.9468399 -6.085371e+01   -0.0406413
-## table 1.923645e-01  -0.94683994    4.9929481  1.133318e+03    0.4896429
-## price 1.742765e+03 -60.85371214 1133.3180641  1.591563e+07 3958.0214908
-## x     5.184841e-01  -0.04064130    0.4896429  3.958021e+03    1.2583472
-## y     5.152478e-01  -0.04800857    0.4689723  3.943271e+03    1.2487893
-## z     3.189168e-01   0.09596797    0.2379960  2.424713e+03    0.7684875
-##                   y            z
-## carat    0.51524782 3.189168e-01
-## depth   -0.04800857 9.596797e-02
-## table    0.46897228 2.379960e-01
-## price 3943.27081043 2.424713e+03
-## x        1.24878933 7.684875e-01
-## y        1.30447161 7.673196e-01
-## z        0.76731958 4.980109e-01</code></pre>
+price_cov_donnees_num &lt;- cov_donnees_num[, &quot;price&quot;]
+print(price_cov_donnees_num)</code></pre>
+<pre><code>##         carat         depth         table         price             x 
+##  1.742765e+03 -6.085371e+01  1.133318e+03  1.591563e+07  3.958021e+03 
+##             y             z 
+##  3.943271e+03  2.424713e+03</code></pre>
 <p>La covariance respective entre le prix, le poids en carat, la largeur
 du sommet (table) et les caractéristiques physiques x, y, z du diamant
 est positive; donc ces variables évoluent dans le même sens. Autrement
@@ -965,14 +954,15 @@ l’interprétation de certains coefficients (notamment pour les dimensions
 x, y, et z) nécessite une attention particulière, car ils peuvent être
 affectés par la multicollinéarité.</p>
 </div>
-<div id="estimation-de-la-performance-du-modèle-faire-le-bic-ou-laic" class="section level4">
-<h4>3. Estimation de la performance du modèle: faire le BIC ou
-l’AIC</h4>
+</div>
+<div id="estimation-de-la-performance-du-modèle-faire-le-bic-ou-laic" class="section level3">
+<h3>3. Estimation de la performance du modèle: faire le BIC ou
+l’AIC</h3>
 <p>Etant donné que nous avions des variables fortement correlées entre
 elles dans le modèle précédent, nous allons procéder à une sélection de
 variables.</p>
-<div id="sélection-avec-le-bayesian-information-criterion-bic." class="section level5">
-<h5>3.1. Sélection avec le Bayesian Information Criterion (BIC).</h5>
+<div id="sélection-avec-le-bayesian-information-criterion-bic." class="section level4">
+<h4>3.1. Sélection avec le Bayesian Information Criterion (BIC).</h4>
 <pre class="r"><code>library(MASS)
 final_model &lt;- stepAIC(model2, k = log(nrow(donnees_num)), direction = &quot;both&quot;) # Appliquer stepAIC avec le critère BIC</code></pre>
 <pre><code>## Start:  AIC=788800.2
@@ -1037,8 +1027,8 @@ modèle sont carat, depth, table et X. Le modèle est significatif
 (p-value: &lt; 2.2e-16) et explique 85.92% de la variation du prix des
 diamants (Adjusted R-squared: 0.8592).</p>
 </div>
-<div id="sélection-avec-lakaike-information-criterion-aic." class="section level5">
-<h5>3.2. Sélection avec l’Akaike Information Criterion (AIC).</h5>
+<div id="sélection-avec-lakaike-information-criterion-aic." class="section level4">
+<h4>3.2. Sélection avec l’Akaike Information Criterion (AIC).</h4>
 <pre class="r"><code>final_model2 &lt;- stepAIC(model2, k = 2, direction = &quot;both&quot;) # Appliquer stepAIC avec le critère AIC</code></pre>
 <pre><code>## Start:  AIC=788737.9
 ## price ~ carat + depth + table + x + y + z
@@ -1092,8 +1082,8 @@ modèle sont carat, depth, table et x et y. Le modèle significatif
 diamants (Adjusted R-squared: 0.8592)</p>
 </div>
 </div>
-<div id="prédiction" class="section level4">
-<h4>4. Prédiction</h4>
+<div id="prédiction" class="section level3">
+<h3>4. Prédiction</h3>
 <p>Pour la prédiction, nous allons utiliser le modèle final qui a été
 fourni grâce à la sélection avec le critère BIC car celui ci est plus
 parcimonieux, il est autant performant que les autres modèles mais avec
@@ -1103,13 +1093,12 @@ head(predictions)</code></pre>
 <pre><code>##            1            2            3            4            5            6 
 ## 348.01940261 -67.07490137 122.76614838 193.29708562  54.29107567  -0.03592747</code></pre>
 </div>
-<div id="axes-damélioration" class="section level4">
-<h4>5. Axes d’amélioration</h4>
+<div id="axes-damélioration" class="section level3">
+<h3>5. Axes d’amélioration</h3>
 <p>Pour améliorer ce modèle, on pourrait envisager d’exclure ou de
 transformer certaines variables, d’ajouter des interactions si
 pertinentes, ou d’explorer des modèles non linéaires ou des méthodes
 d’ensemble si la complexité des relations le justifie.</p>
-</div>
 </div>
 </div>
 <div id="conclusion" class="section level2">
