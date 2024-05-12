@@ -283,8 +283,8 @@ La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance
 donnees_num <- donnees[sapply(donnees, is.numeric)]
 donnees_num <- subset(donnees_num, select = -...1)
 cov_donnees_num <- cov(donnees_num)
-print(cov_donnees_num)
-
+price_cov_donnees_num <- cov_donnees_num[, "price"]
+print(price_cov_donnees_num)
 ```
 
 La covariance respective entre le prix, le poids en carat, la largeur du sommet (table) et les caractéristiques physiques x, y, z du diamant est positive; donc ces variables évoluent dans le même sens. Autrement dit, une augmentation de chacune d'elle entraine une augmentation du prix du diamant. Par contre, la covariance entre le prix et la profondeur du diamant est négative, donc les deux évoluent en sens inverse.
@@ -310,11 +310,6 @@ Le prix est fortement correlé au carat et aux caractéristiques physiques x, y 
 
 
 ###### NB///(Dans nos analyses univariées, nous avons relevé que notre distribution ne suivait pas une loi normale. Ainsi, avant de procéder à la regression, nous allons normaliser les données.)
-
-```{r}
-
-```
-
 
 ### 1. Modèle de régression simple
 
@@ -382,11 +377,11 @@ print(vif_model)
 Le modèle est statistiquement robuste et efficace pour prédire le prix des diamants en se basant sur les variables incluses. Cependant, l'interprétation de certains coefficients (notamment pour les dimensions x, y, et z) nécessite une attention particulière, car ils peuvent être affectés par la multicollinéarité. 
 
 
-#### 3. Estimation de la performance du modèle: faire le BIC ou l'AIC
+### 3. Estimation de la performance du modèle: faire le BIC ou l'AIC
 
 Etant donné que nous avions des variables fortement correlées entre elles dans le modèle précédent, nous allons procéder à une sélection de variables. 
 
-##### 3.1. Sélection avec le Bayesian Information Criterion (BIC).
+#### 3.1. Sélection avec le Bayesian Information Criterion (BIC).
 
 ```{r}
 library(MASS)
@@ -397,7 +392,7 @@ summary(final_model)
 Le critère BIC suggère que les variables les plus pertinentes de ce modèle sont carat, depth, table et X. Le modèle est significatif (p-value: < 2.2e-16) et explique 85.92% de la variation du prix des diamants (Adjusted R-squared:  0.8592).
 
 
-##### 3.2. Sélection avec l'Akaike Information Criterion (AIC).
+#### 3.2. Sélection avec l'Akaike Information Criterion (AIC).
 
 ```{r}
 final_model2 <- stepAIC(model2, k = 2, direction = "both") # Appliquer stepAIC avec le critère AIC
@@ -408,7 +403,7 @@ Le critère AIC suggère que les variables les plus pertinentes de ce modèle so
 
 
 
-#### 4. Prédiction
+### 4. Prédiction
 
 Pour la prédiction, nous allons utiliser le modèle final qui a été fourni grâce à la sélection avec le critère BIC car celui ci est plus parcimonieux, il est autant performant que les autres modèles mais avec le moins de variables.
 
@@ -418,7 +413,7 @@ head(predictions)
 ```
 
 
-#### 5. Axes d'amélioration
+### 5. Axes d'amélioration
 
 Pour améliorer ce modèle, on pourrait envisager d'exclure ou de transformer certaines variables, d'ajouter des interactions si pertinentes, ou d'explorer des modèles non linéaires ou des méthodes d'ensemble si la complexité des relations le justifie.
 
