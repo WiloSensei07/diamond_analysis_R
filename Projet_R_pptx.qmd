@@ -1,0 +1,333 @@
+---
+title: "Projet d'Analyse de Données avec R"
+author: "Wilfried TCHATCHOU SINKAM & Joan Cindy MIKONGO OUAMBO"
+format: pptx
+editor: visual
+---
+
+## INTRODUCTION ET PROBLEMATIQUE
+
+La problématique assignée à ce projet consiste à prédire le prix des diamants en fonction de diverses variables. Pour ce faire, nous utiliserons le dataset diamonds et un modèle de régression qui prendra en compte les caractéristiques des diamants telles que le carat, la qualité de la coupe (cut), la couleur (color), la clarté (clarity), la profondeur (depth), la largeur du sommet (table), ainsi que les dimensions physiques (x, y, z).
+
+L'objectif est de développer un modèle capable de capturer les relations entre ces variables et le prix des diamants, afin de pouvoir estimer le prix d'un diamant donné en se basant sur ses caractéristiques. Cette prédiction peut être utilisée par les professionnels de l'industrie diamantaire, tels que les bijoutiers, les négociants en diamants ou les enchérisseurs, pour évaluer la valeur des diamants et prendre des décisions éclairées lors de l'achat ou de la vente de ces pierres précieuses.
+
+Il est important de souligner que la qualité et l'exactitude des prédictions dépendront de la qualité des données d'entraînement, de la sélection appropriée des caractéristiques pertinentes et du choix du modèle de régression approprié.
+
+## I- Importation et Description du Dataset
+
+### 1. Description
+
+```{r}
+library(readr)
+library(car)
+library(ggplot2)
+library(lm.beta)
+library(corrplot)
+donnees <- read_csv("diamonds.csv")
+View(donnees)
+attach(donnees)
+```
+
+```{r}
+dim(donnees)
+str(donnees)
+```
+
+Notre Dataset est constitué de 53940 observations. En dehors de la variable d'identification, le dataset est composé de 10 variables ; 07 d'entre elles à savoir carat, depht, table, price, x, y et z sont de nature quantitatives et de type réel; le cut, le color et la clarity sont de nature qualitatives.
+
+Carat: Poids du diamant en carat ; Depth: Profondeur totale pourcentage ; Table: Largeur du sommet du diamant ; Price: Prix du diamant ; X: Longueur du diamant en mm ; Y: Largeur du diamant en mm ; Z: Profondeur du diamant en mm ; Cut: Qualité de la coupure du diamant ; Color: Couleur du diamant ; Clarity: mesure de la clarté du diamant.
+
+### 2. Vérification des valeurs manquantes
+
+```{r}
+valeur_manquant <- sum(colSums(is.na(donnees)))
+if (valeur_manquant>1){
+  cat("Les valeurs manquantes sont au nombre de ", valeur_manquant, "\n")
+} else {
+  cat("Aucune valeur manquante, car il y'a ", valeur_manquant, " valeur manquante!", "\n")
+}
+```
+
+## II- Distribution des données
+
+### 1- La variable dépendante: Price
+
+```{r}
+summary(price)
+```
+
+```{r}
+par(mfrow = c(1, 2))
+hist(price, breaks="FD", freq=FALSE, xlab="Prix", main="Distribution des prix", cex.main = 0.75)
+lines(density(price), col = "orange", lwd = 2)
+boxplot(price, ylab="Prix", main="Boxplot des prix", cex.main = 0.75)
+```
+
+Les prix des diamants sont compris entre 326 et 18823 dollars. La moitié des diamants ont un prix inférieur ou égal à 2401 dollars et le diamant moyen vaut 3933 dollars. L'examen de la distribtion assortie de sa courbe de densité montre que les prix en carat ne suivent pas une loi normale. La présence de valeurs extrêmes est identifiable par des points individuels au-delà de la moustache supérieure. Il s'agit des diamants dont les prix sont significativement plus élevés par rapport à ceux des autres diamants. Ainsi, les diamants d'une valeur supérieure à 12000 dollars sont considérés comme étant des valeurs extrêmes.
+
+### 2- Les variables indépendantes quantitatives
+
+#### 2.1. Distribution
+
+```{r}
+summary(donnees[c("carat", "depth","table", "x", "y", "z")])
+```
+
+```{r}
+par(mfrow = c(2, 3))
+
+hist(depth, breaks="FD", freq=FALSE, xlab="Pourcentage des profondeurs", main="Distribution suivant le pourcentage des profondeurs", cex.main = 0.75)
+lines(density(depth), col = "orange", lwd = 2)
+
+hist(table, breaks="FD", freq=FALSE, xlab="Largeur des sommets de diamants", main="Distribution des largeur des sommets de diamants", cex.main = 0.75)
+lines(density(table), col = "orange", lwd = 2)
+
+hist(carat, breaks="FD", freq=FALSE, xlab="poids en carat", main="Distribution suivant les poids en Carats", cex.main = 0.75)
+lines(density(carat), col = "orange", lwd = 2)
+
+hist(x, breaks="FD", freq=FALSE, xlab="Longueur en mm", main="Distribution des longueurs en mm", cex.main = 0.75)
+lines(density(x), col = "orange", lwd = 2)
+
+hist(y, breaks="FD", freq=FALSE, xlab="Largeur en mm", main="Distribution des largeurs en mm", cex.main = 0.75)
+lines(density(y), col = "orange", lwd = 2)
+
+hist(z, breaks="FD", freq=FALSE, xlab="Profondeur en mm", main="Distribution des profondeurs en mm", cex.main = 0.75)
+lines(density(z), col = "orange", lwd = 2)
+
+```
+
+-   Le diamant moyen pèse 0.79 Carat, un sommet de 57.46 mm, un pourcentage de profondeur égal à 61.75%, une longueur de 5.731 mm, une largeur de 5.73 mm et une profondeur de 3.53.
+
+-   L'examen des distribtions assorties de leurs courbes de densité montre qu'en dehors du pourcentage des profondeurs (Depth), les autres variables ne suivent pas une loi normale.
+
+#### 2.2. Valeurs aberrantes
+
+```{r}
+par(mfrow = c(2, 3))
+boxplot(depth, ylab=" Pourcentage des Profondeurs", main="Boxplot du pourcentage des profondeurs",cex.main = 0.75)
+boxplot(table, ylab="Largeur des sommets de diamants", main="Boxplot Largeur des sommets de diamants", cex.main = 0.75)
+boxplot(carat, ylab="Poids en carat", main="Boxplot de carat", cex.main = 0.75)
+boxplot(x, ylab="Longueurs en mm", main="Boxplot des longueurs en mm", cex.main = 0.75)
+boxplot(y, ylab="Largeur en mm", main="Boxplot des largeurs en mm", cex.main = 0.75)
+boxplot(z, ylab="Profondeur en mm", main="Boxplot des profondeurs en mm", cex.main = 0.75)
+
+```
+
+La présence de valeurs extrêmes est identifiable par des points individuels au-delà des moustaches. Il s'agit des diamants dont les caractéristiques sont significativement plus élevées ou moins élevées par rapport à celles des autres diamants.
+
+### 3- Les variables indépendantes quanlitatives
+
+```{r}
+par(mfrow = c(1, 3))
+color_count <- table(color)
+color_percentage <- round(prop.table(color_count) * 100, 2)
+pie(color_percentage, labels = paste0(names(color_percentage), " (", color_percentage, ")"),col = rainbow(length(color_percentage)), main="couleurs (%)")
+
+cut_count <- table(cut)
+cut_percentage <- round(prop.table(cut_count) * 100, 2)
+pie(cut_percentage, labels = paste0(names(cut_percentage), " (", cut_percentage, ")"),col = rainbow(length(cut_percentage)), main="qualité de la coupure (%)")
+
+clarity_count <- table(clarity)
+clarity_percentage <- round(prop.table(clarity_count) * 100, 2)
+pie(clarity_percentage, labels = paste0(names(clarity_percentage), " (", clarity_percentage, ")"),col = rainbow(length(clarity_percentage)), main="clarté (%)")
+```
+
+-   Les couleurs vont de D à J, qui représentent la couleur la plus meilleure à la plus pire. Ainsie, la plus grande partie des diamants (20.93%) ont une couleur jugée de qualité moyenne (couleur G). Seuls 5.21% des diamants ont une couleur considérée comme mauvaise (couleur J).
+
+-   39.95% des diamants ont des coupures considérées comme idéales, 25.57% sont de qualité premium, et seul 2.98% sont considérées comme ayant des coupures passables.
+
+-   Les mesures de clarté varie entre I1 et IF. I1 représente la pire des clartés où des défauts internes sont visibles à l'oeil nu (1.37%) tandis que IF représente la meilleure des clartés où aucune inclusion ou défaut interne n'est visible sous une loupe grossissante de 10x (3.32%), c'est la plus haute qualité de clarté.
+
+-   VVS1/VVS2 : De très petites inclusions difficiles à voir sous une loupe grossissante de 10x.
+
+-   VS1/VS2 : De petites inclusions visibles sous une loupe grossissante de 10x, mais difficilement visibles à l'œil nu.
+
+-   SI1/SI2 : Des inclusions visibles sous une loupe grossissante de 10x, et parfois visibles à l'œil nu.
+
+## III- Analyse bivariée
+
+### 1.Test d'indépendance entre la variable à expliquer (Price) et les variables qualitatives
+
+#### 1.1. Entre Price et Cut
+
+```{r}
+anov <- aov(price ~ cut, data =donnees)
+summary(anov)
+
+```
+
+P-value \<2e-16, donc nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'cut' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'cut'. Le F-value élevé (175.7) confirme également que la variable 'cut' a un effet significatif et fort sur la variable dépendante.
+
+#### 1.2. Entre Price et Color
+
+```{r}
+anov <- aov(price ~ color, data =donnees)
+summary(anov)
+```
+
+La p-value pour la variable 'color' est inférieure à 0.001 (indiquée par \*\*\*), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'color' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'color'. Le F-value élevé (290.2) confirme également que la variable 'color' a un effet significatif et fort sur la variable dépendante.
+
+#### 1.3. Entre Price et Clarity
+
+```{r}
+anov <- aov(price ~ clarity, data =donnees)
+summary(anov)
+```
+
+La p-value pour la variable 'clarity' est inférieure à 0.001 (indiquée par \*\*\*), ce qui signifie que nous pouvons rejeter l'hypothèse nulle que toutes les catégories de 'clarity' ont la même moyenne. En termes simples, il y a une différence significative sur la variable dépendante en fonction des différents niveaux de 'clarity'. Le F-value élevé (215) confirme également que la variable 'clarity' a un effet significatif et fort sur la variable dépendante.
+
+### 2. Test d'indépendance entre les variables qualitatives
+
+#### 2.1. Entre Cut et Clarity
+
+```{r}
+chisq.test(table(cut, clarity))
+```
+
+La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la coupure ('cut') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.
+
+#### 2.2. Entre Cut et Color
+
+```{r}
+chisq.test(table(cut, color))
+```
+
+La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'cut' et 'color'. En d'autres termes, il existe une association statistiquement significative entre la qualité de la coupure ('cut') et la couleur ('color') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.
+
+#### 2.3. Entre Color et Clarity
+
+```{r}
+chisq.test(table(color, clarity))
+```
+
+La p-value très basse nous permet de rejeter l'hypothèse nulle d'indépendance entre les variables 'color' et 'clarity'. En d'autres termes, il existe une association statistiquement significative entre la couleur ('color') et la clarté ('clarity') des données analysées. Les deux variables ne sont pas indépendantes, et les variations dans l'une sont associées à des variations dans l'autre.
+
+### 3. Test d'indépendance entre la variable à expliquer (Price) et les variables quantitatives
+
+#### 3.1. La covariance
+
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+cov_donnees_num <- cov(donnees_num)
+print(cov_donnees_num[,"price"])
+
+```
+
+La covariance respective entre le prix, le poids en carat, la largeur du sommet (table) et les caractéristiques physiques x, y, z du diamant est positive; donc ces variables évoluent dans le même sens. Autrement dit, une augmentation de chacune d'elle entraine une augmentation du prix du diamant. Par contre, la covariance entre le prix et la profondeur du diamant est négative, donc les deux évoluent en sens inverse.
+
+#### 3.2. La corrélation
+
+```{r}
+donnees_num <- donnees[sapply(donnees, is.numeric)]
+donnees_num <- subset(donnees_num, select = -...1)
+cor_donnees_num <- cor(donnees_num)
+corrplot(cor_donnees_num, method = "color", type = "lower", order = "hclust",
+         addCoef.col = "orange", # Ajoute les coefficients de corrélation
+         tl.col = "black", # Couleur du texte des labels
+         tl.srt = 45, # Rotation des labels
+         diag = FALSE) # Ne pas inclure les diagonales
+```
+
+Le prix est fortement correlé au carat et aux caractéristiques physiques x, y et z du diamant. Par contre, il est faiblement correlé à la profondeur et à la largeur du somment du diamant. Par ailleurs, les variables x, y, z et carat sont également fortement correlées entre elles.
+
+## IV- MOD**È**LE DE REGRESSION
+
+D'entrée de jeu, nous allons diviser notre dataset en 2 parties: train et test.
+
+```{r}
+# Définir la proportion d'observations pour l'ensemble d'entraînement (par exemple, 80%)
+train_prop <- 0.85
+
+# Déterminer le nombre d'observations pour l'ensemble d'entraînement
+train_size <- floor(train_prop * nrow(donnees_num))
+
+# Générer des indices aléatoires pour l'ensemble d'entraînement
+train_indices <- sample(seq_len(nrow(donnees_num)), train_size)
+
+# Créer l'ensemble d'entraînement en utilisant les indices générés
+train_data <- as.data.frame(donnees_num[train_indices, ])
+
+# Créer l'ensemble de test en utilisant les indices restants
+test_data <- as.data.frame(donnees_num[-train_indices, ])
+
+```
+
+```{r}
+# Appliquer la normalisation à chaque colonne du dataset
+# Calculer les statistiques de normalisation sur l'ensemble d'entraînement
+
+train_mean <- apply(train_data, 2, mean)
+train_sd <- apply(train_data, 2, sd)
+
+# Appliquer la normalisation aux ensembles d'entraînement et de test
+train_data <- as.data.frame(scale(train_data, center = train_mean, scale = train_sd))
+test_data <- as.data.frame(scale(test_data, center = train_mean, scale = train_sd))
+```
+
+### 1. Modèle de régression simple
+
+```{r}
+model1 <- lm(price ~ carat, data = train_data)
+summary(model1)
+```
+
+-   Le coefficient de carat est estimé à 9.215e-01, ce qui signifie qu'une augmentation d'une unité de carat est associée à une augmentation de 9.215e-01 unités dans le prix estimé.
+
+-   Le R² ajusté, qui prend en compte le nombre de variables explicatives, révèle que le modèle explique 84.91% du prix du diamant.
+
+-   La p-value associée à la statistique F est très faible (\< 2.2e-16), ce qui indique que le modèle dans son ensemble est statistiquement significatif. Le modèle est donc pertinent.
+
+### 2. Modèle Saturé
+
+```{r}
+model2 <- lm(price ~ carat + depth + table + x + y + z, data = train_data)
+summary(model2)
+vif_model <- vif(model2)
+print(vif_model)
+```
+
+-   Toute chose étant égale par ailleurs, le carat, le depth, la table et la caractéristique x ont un effet significatif sur le prix (p-value\<2e-16).
+
+-   Le modèle explique environ 85.86% de la variabilité du prix des diamants, ce qui est très élevé. Cela suggère que le modèle est globalement efficace pour prédire le prix.
+
+-   La p-value associée très faible indique que le modèle est statistiquement significatif et pertinent.
+
+-   Le modèle est statistiquement robuste et efficace pour prédire le prix des diamants en se basant sur les variables incluses. Cependant, l'interprétation de certains coefficients (notamment pour les dimensions x, y, et z) nécessite une attention particulière, car ils sont affectés par la multicollinéarité.
+
+### 3. Estimation de la performance du modèle: le BIC
+
+Etant donné que nous avions des variables fortement correlées entre elles dans le modèle précédent, nous allons procéder à une sélection de variables avec le critère Bayesian Information Criterion (BIC). Il est parcimonieux et permet d'obtenir un modèle autant performant que les autres modèles mais avec le moins de variables.
+
+```{r}
+library(MASS)
+final_model <- stepAIC(model2, k = log(nrow(train_data)), direction = "both") # Appliquer stepAIC avec le critère BIC
+summary(final_model)
+
+```
+
+Le critère BIC suggère que les variables les plus pertinentes de ce modèle sont carat, depth, table, et x. Le modèle constitué de ces 4 variables est significatif (p-value: \< 2.2e-16) et explique 85.86% de la variation du prix des diamants, tout comme le modèle saturé.
+
+### 
+
+### 4. Prédiction
+
+Pour la prédiction, nous allons utiliser le modèle final qui a été fourni grâce à la sélection effectuée avec le critère BIC. Et nous avons obtenu les prédictions suivantes pour les 06 pemiers tests :
+
+```{r}
+pred <- predict(final_model, data = test_data) # Prédictions normalisées
+```
+
+```{r}
+predictions <- pred *train_sd[4] + train_mean[4] # Retour à l'echelle initiale
+head(predictions)
+
+```
+
+### 5. Axes d'amélioration
+
+Pour améliorer ce modèle, on pourrait envisager d'exclure ou de transformer certaines variables, d'ajouter des interactions si pertinentes, ou d'explorer des modèles non linéaires ou des méthodes d'ensemble si la complexité des relations le justifie.
+
+## CONCLUSION GÉNÉRALE
+
+Le modèle de régression linéaire ajusté sur le dataset des diamants démontre une capacité élevée à prédire le prix des diamants, avec un R² ajusté de 0.8593, indiquant que le modèle explique environ 86% de la variabilité du prix à partir des variables sélectionnées telles que le carat, la profondeur, la table et la dimension x. Les coefficients significatifs pour toutes ces variables suggèrent des relations fortes et statistiquement significatives avec le prix. Les erreurs résiduelles sont relativement faibles, renforçant la fiabilité des prédictions du modèle. Ce modèle peut donc servir efficacement les professionnels de l'industrie diamantaire pour évaluer de manière précise la valeur des diamants.

@@ -11,7 +11,6 @@
 
 <meta name="author" content="Wilfried TCHATCHOU SINKAM &amp; Joan Cindy MIKONGO OUAMBO" />
 
-<meta name="date" content="2024-04-29" />
 
 <title>Projet d’Analyse de Données avec R</title>
 
@@ -353,13 +352,12 @@ display: none;
 <h1 class="title toc-ignore">Projet d’Analyse de Données avec R</h1>
 <h4 class="author">Wilfried TCHATCHOU SINKAM &amp; Joan Cindy MIKONGO
 OUAMBO</h4>
-<h4 class="date">2024-04-29</h4>
 
 </div>
 
 
-<div id="introduction-et-problematique" class="section level2">
-<h2>INTRODUCTION ET PROBLEMATIQUE</h2>
+<div id="introduction-et-problématique" class="section level2">
+<h2>INTRODUCTION ET PROBLÉMATIQUE</h2>
 <p>La problématique assignée à ce projet consiste à prédire le prix des
 diamants en fonction de diverses variables. Pour ce faire, nous
 utiliserons le dataset diamonds et un modèle de régression qui prendra
@@ -526,8 +524,8 @@ montre qu’en dehors du pourcentage des profondeurs (Depth), les autres
 variables ne suivent pas une loi normale.</p></li>
 </ul>
 </div>
-<div id="valeurs-abbérantes" class="section level4">
-<h4>2.2. Valeurs abbérantes</h4>
+<div id="valeurs-aberrantes" class="section level4">
+<h4>2.2. Valeurs aberrantes</h4>
 <pre class="r"><code>par(mfrow = c(2, 3))
 boxplot(depth, ylab=&quot; Pourcentage des Profondeurs&quot;, main=&quot;Boxplot du pourcentage des profondeurs&quot;,cex.main = 0.75)
 boxplot(table, ylab=&quot;Largeur des sommets de diamants&quot;, main=&quot;Boxplot Largeur des sommets de diamants&quot;, cex.main = 0.75)
@@ -692,23 +690,11 @@ variables quantitatives</h3>
 <pre class="r"><code>donnees_num &lt;- donnees[sapply(donnees, is.numeric)]
 donnees_num &lt;- subset(donnees_num, select = -...1)
 cov_donnees_num &lt;- cov(donnees_num)
-print(cov_donnees_num)</code></pre>
-<pre><code>##              carat        depth        table         price            x
-## carat 2.246867e-01   0.01916653    0.1923645  1.742765e+03    0.5184841
-## depth 1.916653e-02   2.05240384   -0.9468399 -6.085371e+01   -0.0406413
-## table 1.923645e-01  -0.94683994    4.9929481  1.133318e+03    0.4896429
-## price 1.742765e+03 -60.85371214 1133.3180641  1.591563e+07 3958.0214908
-## x     5.184841e-01  -0.04064130    0.4896429  3.958021e+03    1.2583472
-## y     5.152478e-01  -0.04800857    0.4689723  3.943271e+03    1.2487893
-## z     3.189168e-01   0.09596797    0.2379960  2.424713e+03    0.7684875
-##                   y            z
-## carat    0.51524782 3.189168e-01
-## depth   -0.04800857 9.596797e-02
-## table    0.46897228 2.379960e-01
-## price 3943.27081043 2.424713e+03
-## x        1.24878933 7.684875e-01
-## y        1.30447161 7.673196e-01
-## z        0.76731958 4.980109e-01</code></pre>
+print(cov_donnees_num[,&quot;price&quot;])</code></pre>
+<pre><code>##         carat         depth         table         price             x 
+##  1.742765e+03 -6.085371e+01  1.133318e+03  1.591563e+07  3.958021e+03 
+##             y             z 
+##  3.943271e+03  2.424713e+03</code></pre>
 <p>La covariance respective entre le prix, le poids en carat, la largeur
 du sommet (table) et les caractéristiques physiques x, y, z du diamant
 est positive; donc ces variables évoluent dans le même sens. Autrement
@@ -736,8 +722,8 @@ elles.</p>
 </div>
 </div>
 </div>
-<div id="iv--modéle-de-regression" class="section level2">
-<h2>IV- MODÉLE DE REGRESSION</h2>
+<div id="iv--modèle-de-regression" class="section level2">
+<h2>IV- MODÈLE DE REGRESSION</h2>
 <p>D’entrée de jeu, nous allons diviser notre dataset en 2 parties:
 train et test.</p>
 <pre class="r"><code># Définir la proportion d&#39;observations pour l&#39;ensemble d&#39;entraînement (par exemple, 80%)
@@ -773,18 +759,18 @@ summary(model1)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -4.6507 -0.2014 -0.0047  0.1347  3.1943 
+## -4.6481 -0.2014 -0.0049  0.1346  3.1863 
 ## 
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) -1.236e-16  1.818e-03     0.0        1    
-## carat        9.211e-01  1.818e-03   506.7   &lt;2e-16 ***
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 4.270e-16  1.817e-03     0.0        1    
+## carat       9.212e-01  1.818e-03   506.8   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.3893 on 45847 degrees of freedom
-## Multiple R-squared:  0.8485, Adjusted R-squared:  0.8485 
-## F-statistic: 2.567e+05 on 1 and 45847 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 0.3892 on 45847 degrees of freedom
+## Multiple R-squared:  0.8486, Adjusted R-squared:  0.8485 
+## F-statistic: 2.569e+05 on 1 and 45847 DF,  p-value: &lt; 2.2e-16</code></pre>
 <ul>
 <li><p>Le coefficient de carat est estimé à 9.215e-01, ce qui signifie
 qu’une augmentation d’une unité de carat est associée à une augmentation
@@ -807,27 +793,27 @@ summary(model2)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -5.9179 -0.1558 -0.0124  0.0884  3.1984 
+## -5.9348 -0.1548 -0.0125  0.0882  3.1910 
 ## 
 ## Coefficients:
 ##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  1.058e-16  1.760e-03   0.000   1.0000    
-## carat        1.255e+00  8.150e-03 154.018   &lt;2e-16 ***
-## depth       -7.294e-02  2.132e-03 -34.219   &lt;2e-16 ***
-## table       -5.777e-02  1.884e-03 -30.660   &lt;2e-16 ***
-## x           -3.552e-01  1.267e-02 -28.045   &lt;2e-16 ***
-## y            1.466e-02  7.390e-03   1.983   0.0474 *  
-## z            1.137e-02  8.140e-03   1.396   0.1626    
+## (Intercept)  9.394e-16  1.758e-03   0.000   1.0000    
+## carat        1.261e+00  8.083e-03 156.009   &lt;2e-16 ***
+## depth       -7.406e-02  2.119e-03 -34.948   &lt;2e-16 ***
+## table       -5.727e-02  1.881e-03 -30.450   &lt;2e-16 ***
+## x           -3.615e-01  1.301e-02 -27.782   &lt;2e-16 ***
+## y            1.819e-02  8.233e-03   2.210   0.0271 *  
+## z            8.362e-03  7.918e-03   1.056   0.2909    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.3769 on 45842 degrees of freedom
-## Multiple R-squared:  0.858,  Adjusted R-squared:  0.8579 
-## F-statistic: 4.615e+04 on 6 and 45842 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 0.3764 on 45842 degrees of freedom
+## Multiple R-squared:  0.8584, Adjusted R-squared:  0.8583 
+## F-statistic: 4.63e+04 on 6 and 45842 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>vif_model &lt;- vif(model2)
 print(vif_model)</code></pre>
 <pre><code>##     carat     depth     table         x         y         z 
-## 21.436320  1.466311  1.145646 51.766271 17.625964 21.384583</code></pre>
+## 21.147780  1.453562  1.144847 54.806385 21.936328 20.289530</code></pre>
 <ul>
 <li><p>Toute chose étant égale par ailleurs, le carat, le depth, la
 table et la caractéristique x ont un effet significatif sur le prix
@@ -843,8 +829,9 @@ l’interprétation de certains coefficients (notamment pour les dimensions
 x, y, et z) nécessite une attention particulière, car ils sont affectés
 par la multicollinéarité.</p></li>
 </ul>
-<div id="estimation-de-la-performance-du-modèle-le-bic" class="section level4">
-<h4>3. Estimation de la performance du modèle: le BIC</h4>
+</div>
+<div id="estimation-de-la-performance-du-modèle-le-bic" class="section level3">
+<h3>3. Estimation de la performance du modèle: le BIC</h3>
 <p>Etant donné que nous avions des variables fortement correlées entre
 elles dans le modèle précédent, nous allons procéder à une sélection de
 variables avec le critère Bayesian Information Criterion (BIC). Il est
@@ -852,41 +839,41 @@ parcimonieux et permet d’obtenir un modèle autant performant que les
 autres modèles mais avec le moins de variables.</p>
 <pre class="r"><code>library(MASS)
 final_model &lt;- stepAIC(model2, k = log(nrow(train_data)), direction = &quot;both&quot;) # Appliquer stepAIC avec le critère BIC</code></pre>
-<pre><code>## Start:  AIC=-89405.04
+<pre><code>## Start:  AIC=-89537.72
 ## price ~ carat + depth + table + x + y + z
 ## 
 ##         Df Sum of Sq    RSS    AIC
-## - z      1       0.3 6512.8 -89414
-## - y      1       0.6 6513.1 -89412
-## &lt;none&gt;               6512.5 -89405
-## - x      1     111.7 6624.3 -88636
-## - table  1     133.5 6646.1 -88485
-## - depth  1     166.3 6678.9 -88259
-## - carat  1    3370.0 9882.5 -70295
+## - z      1       0.2 6493.9 -89547
+## - y      1       0.7 6494.4 -89544
+## &lt;none&gt;               6493.7 -89538
+## - x      1     109.3 6603.0 -88783
+## - table  1     131.3 6625.0 -88630
+## - depth  1     173.0 6666.7 -88343
+## - carat  1    3447.7 9941.4 -70023
 ## 
-## Step:  AIC=-89413.83
+## Step:  AIC=-89547.34
 ## price ~ carat + depth + table + x + y
 ## 
 ##         Df Sum of Sq    RSS    AIC
-## - y      1       0.7 6513.5 -89420
-## &lt;none&gt;               6512.8 -89414
-## + z      1       0.3 6512.5 -89405
-## - table  1     133.8 6646.6 -88492
-## - x      1     150.0 6662.8 -88381
-## - depth  1     201.3 6714.1 -88029
-## - carat  1    3370.7 9883.5 -70301
+## - y      1       0.8 6494.6 -89553
+## &lt;none&gt;               6493.9 -89547
+## + z      1       0.2 6493.7 -89538
+## - table  1     131.5 6625.3 -88639
+## - x      1     143.0 6636.9 -88559
+## - depth  1     209.9 6703.7 -88100
+## - carat  1    3447.9 9941.7 -70032
 ## 
-## Step:  AIC=-89419.75
+## Step:  AIC=-89552.54
 ## price ~ carat + depth + table + x
 ## 
 ##         Df Sum of Sq    RSS    AIC
-## &lt;none&gt;               6513.5 -89420
-## + y      1       0.7 6512.8 -89414
-## + z      1       0.4 6513.1 -89412
-## - table  1     134.7 6648.2 -88492
-## - depth  1     202.5 6716.0 -88027
-## - x      1     234.3 6747.8 -87810
-## - carat  1    3378.0 9891.5 -70275</code></pre>
+## &lt;none&gt;               6494.6 -89553
+## + y      1       0.8 6493.9 -89547
+## + z      1       0.3 6494.4 -89544
+## - table  1     132.5 6627.1 -88637
+## - depth  1     211.4 6706.0 -88095
+## - x      1     245.9 6740.6 -87859
+## - carat  1    3456.6 9951.3 -69998</code></pre>
 <pre class="r"><code>summary(final_model)</code></pre>
 <pre><code>## 
 ## Call:
@@ -894,47 +881,57 @@ final_model &lt;- stepAIC(model2, k = log(nrow(train_data)), direction = &quot;b
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -5.9204 -0.1553 -0.0125  0.0881  3.1987 
+## -5.9385 -0.1547 -0.0125  0.0878  3.1914 
 ## 
 ## Coefficients:
 ##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  9.204e-17  1.760e-03    0.00        1    
-## carat        1.256e+00  8.145e-03  154.19   &lt;2e-16 ***
-## depth       -7.175e-02  1.901e-03  -37.75   &lt;2e-16 ***
-## table       -5.797e-02  1.883e-03  -30.79   &lt;2e-16 ***
-## x           -3.306e-01  8.141e-03  -40.61   &lt;2e-16 ***
+## (Intercept)  9.417e-16  1.758e-03    0.00        1    
+## carat        1.262e+00  8.078e-03  156.20   &lt;2e-16 ***
+## depth       -7.326e-02  1.896e-03  -38.63   &lt;2e-16 ***
+## table       -5.747e-02  1.879e-03  -30.58   &lt;2e-16 ***
+## x           -3.363e-01  8.073e-03  -41.66   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.3769 on 45844 degrees of freedom
-## Multiple R-squared:  0.8579, Adjusted R-squared:  0.8579 
-## F-statistic: 6.921e+04 on 4 and 45844 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 0.3764 on 45844 degrees of freedom
+## Multiple R-squared:  0.8583, Adjusted R-squared:  0.8583 
+## F-statistic: 6.945e+04 on 4 and 45844 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>Le critère BIC suggère que les variables les plus pertinentes de ce
 modèle sont carat, depth, table, et x. Le modèle constitué de ces 4
 variables est significatif (p-value: &lt; 2.2e-16) et explique 85.86% de
 la variation du prix des diamants, tout comme le modèle saturé.</p>
 </div>
-<div id="prédiction" class="section level4">
-<h4>4. Prédiction</h4>
+<div id="prédiction" class="section level3">
+<h3>4. Prédiction</h3>
 <p>Pour la prédiction, nous allons utiliser le modèle final qui a été
 fourni grâce à la sélection effectuée avec le critère BIC.</p>
 <pre class="r"><code>pred &lt;- predict(final_model, data = test_data) # Prédictions normalisées</code></pre>
 <pre class="r"><code>predictions &lt;- pred *train_sd[4] + train_mean[4] # Retour à l&#39;echelle initiale
 head(predictions)</code></pre>
-<pre><code>##        1        2        3        4        5        6 
-## 4802.353 3267.831 5227.450 1680.665 9298.558 3339.266</code></pre>
+<pre><code>##         1         2         3         4         5         6 
+##  800.6455 6182.3928 3656.6911 1817.1503 1364.7541 6832.2132</code></pre>
 </div>
-<div id="axes-damélioration" class="section level4">
-<h4>5. Axes d’amélioration</h4>
+<div id="axes-damélioration" class="section level3">
+<h3>5. Axes d’amélioration</h3>
 <p>Pour améliorer ce modèle, on pourrait envisager d’exclure ou de
 transformer certaines variables, d’ajouter des interactions si
 pertinentes, ou d’explorer des modèles non linéaires ou des méthodes
 d’ensemble si la complexité des relations le justifie.</p>
 </div>
 </div>
-</div>
-<div id="conclusion" class="section level2">
-<h2>CONCLUSION</h2>
+<div id="conclusion-générale" class="section level2">
+<h2>CONCLUSION GÉNÉRALE</h2>
+<p>Le modèle de régression linéaire ajusté sur le dataset des diamants
+démontre une capacité élevée à prédire le prix des diamants, avec un R²
+ajusté de 0.8593, indiquant que le modèle explique environ 86% de la
+variabilité du prix à partir des variables sélectionnées telles que le
+carat, la profondeur, la table et la dimension x. Les coefficients
+significatifs pour toutes ces variables suggèrent des relations fortes
+et statistiquement significatives avec le prix. Les erreurs résiduelles
+sont relativement faibles, renforçant la fiabilité des prédictions du
+modèle. Ce modèle peut donc servir efficacement les professionnels de
+l’industrie diamantaire pour évaluer de manière précise la valeur des
+diamants.</p>
 </div>
 
 
